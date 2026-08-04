@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Futures Trading Bot · Tanmay Gupta</title>
+<meta name="description" content="A Binance Futures CLI that signs every request by hand with HMAC-SHA256, validates every input before it touches the network, and ships a real offline dry-run mode.">
+<meta name="theme-color" content="#0b0e13">
+<meta property="og:title" content="Futures Trading Bot · Tanmay Gupta">
+<meta property="og:description" content="A Binance Futures CLI that signs every request by hand with HMAC-SHA256, validates every input before it touches the network, and ships a real offline dry-run mode.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Hanken+Grotesk:wght@300..800&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="pd">
+<div class="grain" aria-hidden="true"></div>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="rail-mobile" aria-hidden="true"><div class="rail-mobile__fill"></div></div>
+
+<header class="pd-back">
+  <a href="../index.html" class="pd-back__brand">TG<span>.</span></a>
+  <a href="../index.html#projects">&larr; All projects</a>
+</header>
+
+<main id="main">
+  <section class="pd-hero">
+    <div class="container">
+      <div class="pd-tier reveal"><span>03</span> Also shipped &middot; project 7 of 7</div>
+      <h1 class="reveal">Futures Trading Bot</h1>
+      <p class="pd-thesis reveal">A CLI that places market, limit, and stop-market orders on Binance Futures, signing every request by hand.</p>
+      <div class="pd-meta pd-tags reveal">
+        <span>2026</span>
+        <span>Python</span><span>REST</span><span>HMAC</span>
+      </div>
+      <div class="pd-cta-row reveal">
+        <a href="https://github.com/tanmay1406/Trading-bot" target="_blank" rel="noopener" class="btn btn--solid">View source on GitHub &#8599;</a>
+        <a href="../index.html#projects" class="btn btn--ghost">All projects</a>
+      </div>
+    </div>
+  </section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="pd-layout">
+      <div class="pd-prose-col">
+        <div class="eyebrow reveal">// 01</div>
+        <div class="pd-section__head reveal"><h2>Why sign a request at all</h2></div>
+        <div class="pd-prose reveal"><p>An exchange needs to know a request genuinely came from you and wasn't altered in transit, without you sending a password on every call. <strong>HMAC-SHA256</strong> signing solves this: your request parameters get combined into a string, hashed together with a secret key only you and the exchange know, and that hash gets attached to the request. The exchange redoes the same hash on its end. If they match, the request is authentic.</p></div>
+      </div>
+      <div class="pd-diagram-col reveal">
+        <div class="pd-diagram"><svg viewBox="0 0 400 356" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pipeline flow diagram">
+<rect class="pd-diagram-node" x="20" y="10" width="360" height="54" rx="9"/>
+<text class="pd-diagram-text" x="200.0" y="34" text-anchor="middle">Order parameters</text>
+<text class="pd-diagram-text--dim" x="200.0" y="49" text-anchor="middle">symbol, side, quantity, type</text>
+<rect class="pd-diagram-node" x="20" y="104" width="360" height="54" rx="9"/>
+<text class="pd-diagram-text" x="200.0" y="128" text-anchor="middle">Build query string</text>
+<text class="pd-diagram-text--dim" x="200.0" y="143" text-anchor="middle">deterministic parameter order</text>
+<rect class="pd-diagram-node pd-diagram-node--accent" x="20" y="198" width="360" height="54" rx="9"/>
+<text class="pd-diagram-text" x="200.0" y="222" text-anchor="middle">HMAC-SHA256 + secret key</text>
+<text class="pd-diagram-text--dim" x="200.0" y="237" text-anchor="middle">signs the exact bytes sent</text>
+<rect class="pd-diagram-node" x="20" y="292" width="360" height="54" rx="9"/>
+<text class="pd-diagram-text" x="200.0" y="316" text-anchor="middle">Signed request to Binance</text>
+<text class="pd-diagram-text--dim" x="200.0" y="331" text-anchor="middle">exchange recomputes and compares</text>
+<line class="pd-diagram-line--flow" x1="200.0" y1="64" x2="200.0" y2="98" marker-end="url(#arrow)"/>
+<line class="pd-diagram-line--flow" x1="200.0" y1="158" x2="200.0" y2="192" marker-end="url(#arrow)"/>
+<line class="pd-diagram-line--flow" x1="200.0" y1="252" x2="200.0" y2="286" marker-end="url(#arrow)"/>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--amber)"/></marker></defs>
+</svg><p class="pd-diagram__caption">The signature covers the exact request sent, so any tampering in transit breaks the hash and the exchange rejects it.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 02</div>
+    <div class="pd-section__head reveal"><h2>No wrapper library, on purpose</h2></div>
+    <div class="pd-prose reveal"><p>Using <code>python-binance</code> would have made signing someone else's problem. Talking to the REST API directly instead means the signing and error handling are fully visible in this codebase, not hidden inside a dependency, which matters both for understanding what's actually happening and for debugging when a request gets rejected.</p></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 03</div>
+    <div class="pd-section__head reveal"><h2>Validate before you spend an API call</h2></div>
+    <div class="pd-prose reveal"><p>Exchanges rate-limit, and sending a malformed request just to discover it's malformed wastes a call you might not get back for a while. Every input, symbol, quantity, order type, gets validated <strong>locally first</strong>. A bad symbol or a non-positive quantity is rejected before it ever reaches the network.</p></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 04</div>
+    <div class="pd-section__head reveal"><h2>Testing without touching real money</h2></div>
+    <div class="pd-prose reveal"><p>The offline dry-run mode stubs only the HTTP layer. Everything else, the real client, the real order-building and validation code, runs exactly as it would live. That means the whole pipeline is verifiable end to end without needing live API credentials or risking funds, even on testnet.</p></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="pd-stats"><div class="pd-stat reveal"><b>HMAC-SHA256</b><span>signs every outgoing request</span></div><div class="pd-stat reveal"><b>3</b><span>order types: market, limit, stop-market</span></div><div class="pd-stat reveal"><b>0</b><span>network calls made in dry-run mode</span></div><div class="pd-stat reveal"><b>Testnet</b><span>default target, safe by design</span></div></div>
+  </div>
+</section>
+
+</main>
+
+<nav class="pd-nextprev">
+  <a href="page-pulse.html">
+    <span class="pd-nextprev__label">&larr; Previous</span>
+    <span class="pd-nextprev__title">Page Pulse</span>
+  </a>
+  <a href="synapseai.html">
+    <span class="pd-nextprev__label">Next &rarr;</span>
+    <span class="pd-nextprev__title">SynapseAI</span>
+  </a>
+</nav>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <span>&copy; 2026 Tanmay Gupta</span>
+    <a href="#main" class="footer__top">Back to top &uarr;</a>
+  </div>
+</footer>
+
+<div class="pd-lightbox">
+  <button class="pd-lightbox__close" aria-label="Close image">Close &#10005;</button>
+  <div class="pd-lightbox__figure">
+    <img src="" alt="">
+    <p class="pd-lightbox__caption"></p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

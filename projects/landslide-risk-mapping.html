@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Landslide Risk Mapping · Tanmay Gupta</title>
+<meta name="description" content="Inside a landslide risk model built from 163 million pixels of Himachal Pradesh elevation data, testing 10 models across 3 paradigms to find the one that actually generalizes.">
+<meta name="theme-color" content="#0b0e13">
+<meta property="og:title" content="Landslide Risk Mapping · Tanmay Gupta">
+<meta property="og:description" content="Inside a landslide risk model built from 163 million pixels of Himachal Pradesh elevation data, testing 10 models across 3 paradigms to find the one that actually generalizes.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Hanken+Grotesk:wght@300..800&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="pd">
+<div class="grain" aria-hidden="true"></div>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="rail-mobile" aria-hidden="true"><div class="rail-mobile__fill"></div></div>
+
+<header class="pd-back">
+  <a href="../index.html" class="pd-back__brand">TG<span>.</span></a>
+  <a href="../index.html#projects">&larr; All projects</a>
+</header>
+
+<main id="main">
+  <section class="pd-hero">
+    <div class="container">
+      <div class="pd-tier reveal"><span>01</span> Featured &middot; project 2 of 7</div>
+      <h1 class="reveal">Landslide Risk Mapping</h1>
+      <p class="pd-thesis reveal">163 million pixels of Himachal Pradesh elevation data, turned into a landslide risk model, then stress-tested across 10 algorithms to find out which one actually generalizes.</p>
+      <div class="pd-meta pd-tags reveal">
+        <span>Jan 2026 to Mar 2026</span>
+        <span>Python</span><span>TensorFlow</span><span>XGBoost</span><span>Rasterio</span>
+      </div>
+      <div class="pd-cta-row reveal">
+        <a href="https://github.com/tanmay1406/landslide_detection_project_HP" target="_blank" rel="noopener" class="btn btn--solid">View source on GitHub &#8599;</a>
+        <a href="../index.html#projects" class="btn btn--ghost">All projects</a>
+      </div>
+    </div>
+  </section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="pd-layout">
+      <div class="pd-prose-col">
+        <div class="eyebrow reveal">// 01</div>
+        <div class="pd-section__head reveal"><h2>Building a dataset from four different sources</h2></div>
+        <div class="pd-prose reveal"><p>There's no single "landslide risk" dataset to download. This one is assembled from a <strong>163 million pixel</strong> digital elevation model (elevation, slope, aspect, roughness), <strong>OpenStreetMap</strong> infrastructure data (distance to the nearest road, building, and river, computed efficiently across tens of thousands of points using STRtree spatial indexing instead of brute-force comparison), satellite-derived <strong>NDVI</strong> vegetation data, and <strong>NASA POWER</strong> rainfall records.</p><p>The rainfall API alone could have meant thousands of individual requests, one per data point. Instead, nearby points get grouped into shared grid cells first, cutting that down to under 100 calls. The final table holds <strong>56,000+ samples</strong> across <strong>18 engineered features</strong>.</p></div>
+      </div>
+      <div class="pd-diagram-col reveal">
+        <div class="pd-diagram"><svg viewBox="0 0 400 356" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pipeline flow diagram">
+<rect class="pd-diagram-node" x="20" y="10" width="360" height="54" rx="9"/>
+<text class="pd-diagram-text" x="200.0" y="34" text-anchor="middle">DEM (163M+ px)</text>
+<text class="pd-diagram-text--dim" x="200.0" y="49" text-anchor="middle">elevation, slope, aspect, roughness</text>
+<rect class="pd-diagram-node" x="20" y="104" width="360" height="54" rx="9"/>
+<text class="pd-diagram-text" x="200.0" y="128" text-anchor="middle">OpenStreetMap</text>
+<text class="pd-diagram-text--dim" x="200.0" y="143" text-anchor="middle">road / building / river distance</text>
+<rect class="pd-diagram-node" x="20" y="198" width="360" height="54" rx="9"/>
+<text class="pd-diagram-text" x="200.0" y="222" text-anchor="middle">Satellite NDVI</text>
+<text class="pd-diagram-text--dim" x="200.0" y="237" text-anchor="middle">vegetation cover</text>
+<rect class="pd-diagram-node" x="20" y="292" width="360" height="54" rx="9"/>
+<text class="pd-diagram-text" x="200.0" y="316" text-anchor="middle">NASA POWER</text>
+<text class="pd-diagram-text--dim" x="200.0" y="331" text-anchor="middle">rainfall, batched into <100 calls</text>
+<line class="pd-diagram-line--flow" x1="200.0" y1="64" x2="200.0" y2="98" marker-end="url(#arrow)"/>
+<line class="pd-diagram-line--flow" x1="200.0" y1="158" x2="200.0" y2="192" marker-end="url(#arrow)"/>
+<line class="pd-diagram-line--flow" x1="200.0" y1="252" x2="200.0" y2="286" marker-end="url(#arrow)"/>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--amber)"/></marker></defs>
+</svg><p class="pd-diagram__caption">Four independent sources, merged into one 56,000+ sample table of 18 engineered features.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 02</div>
+    <div class="pd-section__head reveal"><h2>What the features actually look like</h2></div>
+    <div class="pd-prose reveal"><p>Before touching any model, it's worth seeing how these engineered features relate to each other and to the target. The correlation matrix below is what actually guided which features were worth keeping, and the feature importance chart shows what the eventual best model leaned on most: terrain roughness and slope dominate, well ahead of any single land-use category.</p></div>
+    <div class="pd-gallery" style="margin-top:12px"><div class="pd-gallery__item" data-caption="How the 18 engineered features relate to each other, used to catch redundant or near-duplicate signals before training.">
+      <img src="../assets/img/landslide/correlation-matrix.png" alt="Correlation matrix of engineered features" loading="lazy">
+      <div class="pd-gallery__caption"><b>Feature correlation matrix</b><span>How the 18 engineered features relate to each other, used to catch redundant or near-duplicate signals before training.</span></div>
+    </div><div class="pd-gallery__item" data-caption="Roughness and slope dominate. Rainfall and proximity-to-road follow, well ahead of any single land-use category.">
+      <img src="../assets/img/landslide/feature-importance.png" alt="Top 15 feature importances from XGBoost" loading="lazy">
+      <div class="pd-gallery__caption"><b>Feature importance (XGBoost)</b><span>Roughness and slope dominate. Rainfall and proximity-to-road follow, well ahead of any single land-use category.</span></div>
+    </div></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 03</div>
+    <div class="pd-section__head reveal"><h2>Why 3 classes beat 4</h2></div>
+    <div class="pd-prose reveal"><p>The first version of this model predicted 4 risk classes. Two of the middle classes overlapped heavily; points that were genuinely ambiguous between them confused every model equally. Collapsing those two into one and moving to a <strong>3-class scheme improved every single model tested</strong>, not just the best one, which is what made it a real methodological finding rather than a lucky tweak to chase a leaderboard number.</p><p>The confusion matrices below show the difference directly: with 3 classes, the models' mistakes cluster far closer to the diagonal than they did with 4.</p></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 04</div>
+    <div class="pd-section__head reveal"><h2>Where a bagging model gets confused</h2></div>
+    <div class="pd-prose reveal"><p>Random Forest (bagging) and XGBoost (boosting) make very different kinds of mistakes. Random Forest spreads its errors more evenly across all three classes; XGBoost, trained with a class-overlap issue on this exact 3-class run, collapsed almost entirely into predicting "High" (a known model-selection edge case that is exactly why a confusion matrix, not just an accuracy number, matters).</p></div>
+    <div class="pd-gallery" style="margin-top:12px"><div class="pd-gallery__item" data-caption="Random Forest and Bagging-DT spread errors across all three classes. XGBoost and AdaBoost lean much harder toward over-predicting High risk.">
+      <img src="../assets/img/landslide/confusion-matrices.png" alt="4-model confusion matrix comparison, 3-class scheme" loading="lazy">
+      <div class="pd-gallery__caption"><b>Confusion matrices, 3-class</b><span>Random Forest and Bagging-DT spread errors across all three classes. XGBoost and AdaBoost lean much harder toward over-predicting High risk.</span></div>
+    </div></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 05</div>
+    <div class="pd-section__head reveal"><h2>Ten models, three philosophies</h2></div>
+    <div class="pd-prose reveal"><p><strong>Bagging</strong> (Random Forest, Extra Trees, Bagging-DT) trains many independent trees on random subsets of the data and averages their votes. It reduces variance and tends to generalize reasonably well almost by construction.</p><p><strong>Boosting</strong> (XGBoost, LightGBM, CatBoost, Gradient Boosting, AdaBoost) trains trees sequentially, where each new tree focuses on correcting the previous one's mistakes. It chases accuracy aggressively, which is exactly why it can overfit if left unchecked.</p><p><strong>Deep learning</strong> shows up twice here: an MLP on the tabular features, and a CNN trained on reconstructed spatial image patches, learning directly from the raw shape of the terrain instead of hand-engineered numbers.</p></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="pd-layout">
+      <div class="pd-prose-col">
+        <div class="eyebrow reveal">// 06</div>
+        <div class="pd-section__head reveal"><h2>The real finding: accuracy is not the whole story</h2></div>
+        <div class="pd-prose reveal"><p>Random Forest wins on raw test accuracy at <strong>68.10%</strong>. It also has the largest gap between training and test accuracy of any model tested, a clear overfitting signal. XGBoost lands within about 3 points of Random Forest's accuracy while showing roughly a <strong>third of the generalization gap</strong>.</p><p>That trade-off, not the accuracy number by itself, is the actual headline of this project. A model that scores highest on the data it has seen isn't automatically the model you'd trust on data it hasn't.</p></div>
+      </div>
+      <div class="pd-diagram-col reveal">
+        <div class="pd-diagram"><img src="../assets/img/landslide/accuracy-vs-gap.png" alt="Accuracy vs train-test overfitting gap scatter plot, 3-class scheme" style="width:100%;border-radius:8px;display:block" loading="lazy"><p class="pd-diagram__caption">Top-right is the sweet spot: high accuracy, small gap. Random Forest has the best accuracy; XGBoost has the better trade-off.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="pd-layout">
+      <div class="pd-prose-col">
+        <div class="eyebrow reveal">// 07</div>
+        <div class="pd-section__head reveal"><h2>Building CNN training data that did not exist</h2></div>
+        <div class="pd-prose reveal"><p>A CNN needs spatial grids to learn from, image-shaped patches, not flat rows of numbers. No raw satellite imagery was available for this project, only point-based tabular features. So the elevation patches were <strong>reconstructed</strong>: for every sample, a <code>16&times;16&times;12</code> spatial patch was interpolated from nearby points using <code>LinearNDInterpolator</code>, then verified pixel-exact against the original tabular values at each patch's center.</p><p>The CNN trained on these reconstructed patches didn't beat the tree-based models, landing around 58.5% on the 3-class scheme, but that was never really the point. The point was proving the patches were valid inputs at all.</p></div>
+      </div>
+      <div class="pd-diagram-col reveal">
+        <div class="pd-diagram"><img src="../assets/img/landslide/cnn-patches.png" alt="Reconstructed elevation patches for low, medium, and high risk samples" style="width:100%;border-radius:8px;display:block" loading="lazy"><p class="pd-diagram__caption">Six reconstructed 16x16 elevation patches, two from each risk class, built entirely from interpolated point data.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="pd-stats"><div class="pd-stat reveal"><b>68.1%</b><span>peak accuracy, 3-class Random Forest</span></div><div class="pd-stat reveal"><b>10</b><span>models tested across 3 paradigms</span></div><div class="pd-stat reveal"><b>163M+</b><span>pixels in the source DEM</span></div><div class="pd-stat reveal"><b>19</b><span>total experiments run and logged</span></div></div>
+  </div>
+</section>
+
+</main>
+
+<nav class="pd-nextprev">
+  <a href="synapseai.html">
+    <span class="pd-nextprev__label">&larr; Previous</span>
+    <span class="pd-nextprev__title">SynapseAI</span>
+  </a>
+  <a href="search-engine.html">
+    <span class="pd-nextprev__label">Next &rarr;</span>
+    <span class="pd-nextprev__title">Distributed Search Engine</span>
+  </a>
+</nav>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <span>&copy; 2026 Tanmay Gupta</span>
+    <a href="#main" class="footer__top">Back to top &uarr;</a>
+  </div>
+</footer>
+
+<div class="pd-lightbox">
+  <button class="pd-lightbox__close" aria-label="Close image">Close &#10005;</button>
+  <div class="pd-lightbox__figure">
+    <img src="" alt="">
+    <p class="pd-lightbox__caption"></p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

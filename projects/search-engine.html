@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Distributed Search Engine · Tanmay Gupta</title>
+<meta name="description" content="A production-readiness audit of a ported distributed search engine: master, backup, crawler, and replica nodes, two-phase commit, and what a self-written audit actually checks for.">
+<meta name="theme-color" content="#0b0e13">
+<meta property="og:title" content="Distributed Search Engine · Tanmay Gupta">
+<meta property="og:description" content="A production-readiness audit of a ported distributed search engine: master, backup, crawler, and replica nodes, two-phase commit, and what a self-written audit actually checks for.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Hanken+Grotesk:wght@300..800&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="pd">
+<div class="grain" aria-hidden="true"></div>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="rail-mobile" aria-hidden="true"><div class="rail-mobile__fill"></div></div>
+
+<header class="pd-back">
+  <a href="../index.html" class="pd-back__brand">TG<span>.</span></a>
+  <a href="../index.html#projects">&larr; All projects</a>
+</header>
+
+<main id="main">
+  <section class="pd-hero">
+    <div class="container">
+      <div class="pd-tier reveal"><span>02</span> Systems &middot; project 3 of 7</div>
+      <h1 class="reveal">Distributed Search Engine</h1>
+      <p class="pd-thesis reveal">Ported an existing master, backup, and replica search engine from Python 2 to 3, audited it against production standards, then fixed most of what the audit found.</p>
+      <div class="pd-meta pd-tags reveal">
+        <span>Mar 2026 to May 2026</span>
+        <span>Python</span><span>gRPC</span><span>MongoDB</span><span>Docker</span>
+      </div>
+      <div class="pd-cta-row reveal">
+        <a href="https://github.com/tanmay1406/search-engine" target="_blank" rel="noopener" class="btn btn--solid">View source on GitHub &#8599;</a>
+        <a href="../index.html#projects" class="btn btn--ghost">All projects</a>
+      </div>
+    </div>
+  </section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="pd-layout">
+      <div class="pd-prose-col">
+        <div class="eyebrow reveal">// 01</div>
+        <div class="pd-section__head reveal"><h2>The topology: master, backup, crawler, replica</h2></div>
+        <div class="pd-prose reveal"><p>Four node roles, each with one job. The <strong>Master</strong> holds the authoritative index and coordinates everything. A <strong>Backup</strong> stands by, ready to take over if the master goes down. A <strong>Crawler</strong> feeds new documents in, worth being upfront about: here it's a synthetic data generator rather than a live web crawler, which was a deliberate scope decision, not a hidden gap. <strong>Replicas</strong> serve read queries and get provisioned dynamically based on how popular a query pattern is.</p><p>The design itself, this topology, the popularity-triggered replication, the standby master, is adapted from an existing open-source project. What follows is the part that was actually built here: the port, the audit, and the hardening.</p></div>
+      </div>
+      <div class="pd-diagram-col reveal">
+        <div class="pd-diagram"><svg viewBox="0 0 440 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Search engine node topology diagram">
+<rect class="pd-diagram-node" x="20" y="20" width="110" height="50" rx="8"/>
+<text class="pd-diagram-text" x="75.0" y="41.0" text-anchor="middle">Crawler</text>
+<text class="pd-diagram-text--dim" x="75.0" y="56.0" text-anchor="middle">synthetic feed</text>
+<rect class="pd-diagram-node pd-diagram-node--accent" x="150.0" y="20" width="140" height="56" rx="8"/>
+<text class="pd-diagram-text" x="220.0" y="44.0" text-anchor="middle">Master</text>
+<text class="pd-diagram-text--dim" x="220.0" y="59.0" text-anchor="middle">authoritative index</text>
+<rect class="pd-diagram-node" x="310" y="20" width="110" height="50" rx="8"/>
+<text class="pd-diagram-text" x="365.0" y="41.0" text-anchor="middle">Backup</text>
+<text class="pd-diagram-text--dim" x="365.0" y="56.0" text-anchor="middle">standby</text>
+<line class="pd-diagram-line--flow" x1="130" y1="45.0" x2="150.0" y2="48.0"/>
+<line class="pd-diagram-line--flow" x1="290.0" y1="48.0" x2="310" y2="45.0"/>
+<rect class="pd-diagram-node" x="31.0" y="190" width="110" height="46" rx="8"/>
+<text class="pd-diagram-text" x="86.0" y="209.0" text-anchor="middle">Replica 1</text>
+<text class="pd-diagram-text--dim" x="86.0" y="224.0" text-anchor="middle">read queries</text>
+<line class="pd-diagram-line--flow" x1="220.0" y1="76" x2="86.0" y2="190"/>
+<rect class="pd-diagram-node" x="165.0" y="190" width="110" height="46" rx="8"/>
+<text class="pd-diagram-text" x="220.0" y="209.0" text-anchor="middle">Replica 2</text>
+<text class="pd-diagram-text--dim" x="220.0" y="224.0" text-anchor="middle">read queries</text>
+<line class="pd-diagram-line--flow" x1="220.0" y1="76" x2="220.0" y2="190"/>
+<rect class="pd-diagram-node" x="299.0" y="190" width="110" height="46" rx="8"/>
+<text class="pd-diagram-text" x="354.0" y="209.0" text-anchor="middle">Replica 3</text>
+<text class="pd-diagram-text--dim" x="354.0" y="224.0" text-anchor="middle">read queries</text>
+<line class="pd-diagram-line--flow" x1="220.0" y1="76" x2="354.0" y2="190"/>
+<text class="pd-diagram-text--dim" x="220.0" y="258" text-anchor="middle">heartbeat checks + two-phase commit keep all four in sync</text>
+<defs></defs>
+</svg><p class="pd-diagram__caption">Crawler feeds the Master, which stays synced with a standby Backup and serves reads out to dynamically provisioned Replicas.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 02</div>
+    <div class="pd-section__head reveal"><h2>What breaks when you move from Python 2 to 3</h2></div>
+    <div class="pd-prose reveal"><p>Porting isn't just syntax. Several behaviors changed in ways that only surface at <strong>runtime</strong>, not when the code is parsed or imported. Dictionary methods like <code>.items()</code> started returning views instead of lists, which changes what happens if you mutate a dict while iterating over it. Integer division switched from floor division to true division by default. String and bytes handling got stricter about where the two can mix.</p><p>None of these show up as an import error. They show up as a wrong answer, sometimes only under a specific input, which is exactly the category of bug this port had to hunt down by hand.</p></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 03</div>
+    <div class="pd-section__head reveal"><h2>Why two-phase commit</h2></div>
+    <div class="pd-prose reveal"><p>When the cluster's metadata needs to change in more than one place at once, say, registering a new replica, you can't just tell each node separately. If the process fails halfway through, some nodes have the update and some don't, and now the cluster disagrees with itself.</p><p><strong>Two-phase commit</strong> avoids that by splitting the change into a <em>prepare</em> round ("can everyone do this?") before a <em>commit</em> round ("okay, everyone actually do it"). Nothing takes effect until every node has agreed it can, which makes the update all-or-nothing instead of partial.</p></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="eyebrow reveal">// 04</div>
+    <div class="pd-section__head reveal"><h2>What a production-readiness audit actually checks</h2></div>
+    <div class="pd-prose reveal"><p>After the port, the next step was writing a production-readiness report against the newly-ported code, then fixing most of what it flagged. Concretely, that meant: connections were being opened <strong>per query</strong> instead of pooled, now pooled. Popularity counters were a plain dictionary that grows <strong>forever</strong>, now bounded with an LRU cache. RPCs had <strong>no timeout</strong>, meaning one slow node could hang the whole system, now every RPC has an explicit one. And the process had no graceful shutdown, now it handles SIGTERM properly and finishes in-flight work first.</p><p>None of these are exotic. They're the unglamorous checklist that separates code that works on a laptop from code you'd trust on a server.</p></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="pd-stats"><div class="pd-stat reveal"><b>4</b><span>node roles: master, backup, crawler, replica</span></div><div class="pd-stat reveal"><b>2PC</b><span>keeps metadata changes all-or-nothing</span></div><div class="pd-stat reveal"><b>LRU</b><span>bounded caches, replacing unbounded dicts</span></div><div class="pd-stat reveal"><b>Py2 &rarr; 3</b><span>port that surfaced the audit's first bugs</span></div></div>
+  </div>
+</section>
+
+<section class="pd-section">
+  <div class="container">
+    <div class="pd-callout reveal">
+      <div class="pd-callout__label">What is still open</div>
+      <p>Documented, not hidden: there is no transport security on the gRPC channels yet, and the two-phase commit's rollback path has not been exercised under real failure conditions. A production-readiness report is only useful if it is honest about what it did <strong>not</strong> fix yet.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<nav class="pd-nextprev">
+  <a href="landslide-risk-mapping.html">
+    <span class="pd-nextprev__label">&larr; Previous</span>
+    <span class="pd-nextprev__title">Landslide Risk Mapping</span>
+  </a>
+  <a href="flyh-flight-booking.html">
+    <span class="pd-nextprev__label">Next &rarr;</span>
+    <span class="pd-nextprev__title">Flyh, Flight Booking</span>
+  </a>
+</nav>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <span>&copy; 2026 Tanmay Gupta</span>
+    <a href="#main" class="footer__top">Back to top &uarr;</a>
+  </div>
+</footer>
+
+<div class="pd-lightbox">
+  <button class="pd-lightbox__close" aria-label="Close image">Close &#10005;</button>
+  <div class="pd-lightbox__figure">
+    <img src="" alt="">
+    <p class="pd-lightbox__caption"></p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>
